@@ -1,6 +1,8 @@
 const ErrorObject = require('../utils/ErrorObject');
 const Product = require('../models/product');
 const {mongoDBToApiDTO} = require('../utils/DTO');
+const {redisSave, redisDeleteKey, redisGet} = require('../redis/redis');
+const {getRedisKey, REDIS_QUERY_TYPE} = require('../redis/redisHelper');
 
 const getProductById = async (req, res, next) => {
   const productId = req.params.productId;
@@ -10,12 +12,17 @@ const getProductById = async (req, res, next) => {
     if (!product) {
       return next(new ErrorObject(400, 'No such product exists.'));
     }
-
-    return res.status(200).send({
+    const responseObject = {
       success: true,
       message: 'Successfully fetched product',
       data: mongoDBToApiDTO(product),
-    });
+    };
+
+    // Populate Cache:
+    await redisSave(getRedisKey(REDIS_QUERY_TYPE.GET_PRODUCT, req), responseObject);
+
+    // Return response:
+    return res.status(200).send(responseObject);
   } catch (err) {
     return next(new ErrorObject(500, `Couldnt get product by ID. Something went wrong in getProductById.: ${err}`));
   }
@@ -24,11 +31,17 @@ const getProductById = async (req, res, next) => {
 const getProducts = async (req, res, next) => {
   try {
     const allProducts = await Product.find({});
-    return res.status(200).send({
+
+    const responseObject = {
       success: true,
       message: 'Successfully fetched products',
       data: allProducts.map((product) => mongoDBToApiDTO(product)),
-    });
+    };
+
+    // Populate Cache:
+    await redisSave(getRedisKey(REDIS_QUERY_TYPE.GET_PRODUCTS, req), responseObject);
+
+    return res.status(200).send(responseObject);
   } catch (err) {
     return next(new ErrorObject(500, `Couldnt get all products. Something went wrong in getProducts: ${err}`));
   }
@@ -45,6 +58,9 @@ const createProduct = async (req, res, next) => {
     });
 
     await createdProduct.save();
+
+    // Invalidating Cahce: (Get All Products Cache needs to refresh on next get request).
+    await redisDeleteKey(getRedisKey(REDIS_QUERY_TYPE.GET_PRODUCTS));
 
     return res.status(201).send({
       message: 'Successfully created product.',
@@ -72,11 +88,18 @@ const updateProduct = async (req, res, next) => {
 
     await productToUpdate.save();
 
-    return res.status(200).send({
+    const responseObject = {
       message: 'Successfully updated the product.',
       success: true,
       data: mongoDBToApiDTO(productToUpdate),
-    });
+    };
+
+    // Cache Invalid: So need to update entry for productId related entry.
+    await redisDeleteKey(getRedisKey(REDIS_QUERY_TYPE.GET_PRODUCT, req));
+    // Cache Invalid: So need to update entry for all Products as well.
+    await redisDeleteKey(getRedisKey(REDIS_QUERY_TYPE.GET_PRODUCTS, req));
+
+    return res.status(200).send(responseObject);
   } catch (err) {
     return next(new ErrorObject(500, `Couldnt Update Product. Something went wrong in updateProduct: ${err}`));
   }
@@ -93,7 +116,8 @@ const deleteProduct = async (req, res, next) => {
     }
 
     await Product.deleteOne({_id: product._id});
-
+    await redisDeleteKey(getRedisKey(REDIS_QUERY_TYPE.GET_PRODUCTS, req));
+    await redisDeleteKey(getRedisKey(REDIS_QUERY_TYPE.GET_PRODUCT, req));
     return res.status(200).json({data: {}, success: true, message: 'Deleted quote.'});
   } catch (err) {
     return next(new ErrorObject(500, `Couldnt Delete Product. Something went wrong in deleteProduct: ${err}`));

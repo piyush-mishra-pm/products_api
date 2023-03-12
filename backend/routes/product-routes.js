@@ -1,13 +1,15 @@
 const express = require('express');
-
-const productController = require('../controllers/products-controller');
-const validationFactory = require('../middlewares/validationFactory');
-const validationSchemas = require('../models/validationSchemas');
 const router = express.Router();
 
-router.get('/', productController.getProducts);
+const productController = require('../controllers/products-controller');
+const useCacheIfStored = require('../middlewares/useCacheIfStored');
+const validationFactory = require('../middlewares/validationFactory');
+const validationSchemas = require('../models/validationSchemas');
+const redisHelper = require('../redis/redisHelper');
 
-router.get('/:productId', productController.getProductById);
+router.get('/', useCacheIfStored(redisHelper.REDIS_QUERY_TYPE.GET_PRODUCTS), productController.getProducts);
+
+router.get('/:productId', useCacheIfStored(redisHelper.REDIS_QUERY_TYPE.GET_PRODUCT), productController.getProductById);
 
 router.post('/create', validationFactory(validationSchemas.createProduct, 'body'), productController.createProduct);
 

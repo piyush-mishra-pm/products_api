@@ -1,7 +1,6 @@
 module.exports = {
   JWT_SECRET: process.env.JWT_SECRET,
   MONGO_DB_URL: process.env.MONGO_DB_URL,
-  PORT: process.env.PORT,
   SALT_ROUNDS: process.env.SALT_ROUNDS,
   GOOGLE_RECAPTCA_SECRET_KEY: process.env.GOOGLE_RECAPTCA_SECRET_KEY,
   ENABLE_RECAPTCHA: process.env.ENABLE_RECAPTCHA,
@@ -20,4 +19,6 @@ module.exports = {
   //
   MONGODB_ADDRESS: process.env.MONGODB_ADDRESS,
   NODE_ENV: process.env.NODE_ENV,
+  REDIS_URL: process.env.REDIS_URL,
+  PORT: process.env.PORT,
 };

@@ -1,18 +1,23 @@
 const express = require('express');
 
-const quotesController = require('../controllers/products-controller');
-
+const productController = require('../controllers/products-controller');
+const validationFactory = require('../middlewares/validationFactory');
+const validationSchemas = require('../models/validationSchemas');
 const router = express.Router();
 
-router.get('/', quotesController.getProducts);
+router.get('/', productController.getProducts);
 
-router.get('/:productId', quotesController.getProductById);
+router.get('/:productId', productController.getProductById);
 
-router.post('/create', quotesController.createProduct);
+router.post('/create', validationFactory(validationSchemas.createProduct, 'body'), productController.createProduct);
 
 // PATCH: products/products/:id/update_quantity/?number=10
-router.patch('/:productId/update_quantity', quotesController.updateProduct);
+router.patch(
+  '/:productId/update_quantity',
+  validationFactory(validationSchemas.updateProduct, 'query'),
+  productController.updateProduct
+);
 
-router.delete('/:productId', quotesController.deleteProduct);
+router.delete('/:productId', productController.deleteProduct);
 
 module.exports = router;

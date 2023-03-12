@@ -57,7 +57,6 @@ const createProduct = async (req, res, next) => {
 };
 
 // PATCH: products/products/:id/update_quantity/?number=10
-const MAX_PRODUCT_QUANTITY = 10_000;
 const updateProduct = async (req, res, next) => {
   try {
     const {number} = req.query;
@@ -67,13 +66,6 @@ const updateProduct = async (req, res, next) => {
 
     if (!productToUpdate) {
       return next(new ErrorObject(400, 'Product not found, cannot update the product!'));
-    }
-
-    // Non negative, and less than a specific max value.
-    if (number < 0 || number > MAX_PRODUCT_QUANTITY) {
-      return next(
-        new ErrorObject(400, `Couldnt update product. Update quantity is outside valid range of [0,10_000] !`)
-      );
     }
 
     productToUpdate.quantity = number;

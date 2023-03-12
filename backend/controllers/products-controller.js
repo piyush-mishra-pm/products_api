@@ -60,7 +60,7 @@ const createProduct = async (req, res, next) => {
     await createdProduct.save();
 
     // Invalidating Cahce: (Get All Products Cache needs to refresh on next get request).
-    await redisDeleteKey(getRedisKey(REDIS_QUERY_TYPE.GET_PRODUCTS));
+    await redisDeleteKey(getRedisKey(REDIS_QUERY_TYPE.GET_PRODUCTS, req));
 
     return res.status(201).send({
       message: 'Successfully created product.',

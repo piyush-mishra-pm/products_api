@@ -7,4 +7,4 @@ const productSchema = new Schema({
   quantity: {type: Number, required: true},
 });
 
-module.exports = mongoose.model('Number', productSchema);
+module.exports = mongoose.model('product', productSchema);

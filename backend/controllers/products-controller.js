@@ -3,6 +3,7 @@ const Product = require('../models/product');
 const {mongoDBToApiDTO} = require('../utils/DTO');
 const {redisSave, redisDeleteKey, redisGet} = require('../redis/redis');
 const {getRedisKey, REDIS_QUERY_TYPE} = require('../redis/redisHelper');
+const {MAX_PRODUCT_QUANTITY} = require('../models/validationSchemas');
 
 const getProductById = async (req, res, next) => {
   const productId = req.params.productId;
@@ -82,6 +83,17 @@ const updateProduct = async (req, res, next) => {
 
     if (!productToUpdate) {
       return next(new ErrorObject(400, 'Product not found, cannot update the product!'));
+    }
+
+    // Out of range check (after subtraction or addition): [0,10_000] is valid range of quantity
+    const possibleUpdatedQuantity = parseInt(number) + parseInt(productToUpdate.quantity);
+    if (possibleUpdatedQuantity > MAX_PRODUCT_QUANTITY || possibleUpdatedQuantity < 0) {
+      return next(
+        new ErrorObject(
+          400,
+          `Quanity ${possibleUpdatedQuantity} is out of range as [0,${MAX_PRODUCT_QUANTITY}]. Cannot update the product quantity!`
+        )
+      );
     }
 
     productToUpdate.quantity = number;

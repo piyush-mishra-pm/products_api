@@ -10,8 +10,17 @@ const createProduct = Joi.object({
   quantity: Joi.number().integer().min(0).max(MAX_PRODUCT_QUANTITY).required(),
 }).options({allowUnknown: false});
 
-const updateProduct = Joi.object({
-  number: Joi.number().integer().min(0).max(MAX_PRODUCT_QUANTITY).required(),
+const withNumber = Joi.object({
+  number: Joi.number()
+    .integer()
+    .min(-1 * MAX_PRODUCT_QUANTITY)
+    .max(MAX_PRODUCT_QUANTITY)
+    .required(),
 }).options({allowUnknown: false});
 
-module.exports = {MAX_PRODUCT_QUANTITY, createProduct, updateProduct};
+const withProductId = Joi.object({
+  productId: Joi.string().required(),
+}).options({allowUnknown: false});
+
+module.exports = {MAX_PRODUCT_QUANTITY, createProduct, withNumber, withProductId};
+;

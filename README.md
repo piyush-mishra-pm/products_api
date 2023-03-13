@@ -1,4 +1,4 @@
-## Placement Cell (Coding Ninjas API Assignment)
+## Placement Cell (Coding Ninjas API Assignment):
 
 ------------------------------------------------------------------------------------------
 
@@ -99,3 +99,42 @@
 </details>
 
 ------------------------------------------------------------------------------------------
+
+## Caching flow:
+
+### **Write through Cache**: 
+#### **Read-request flow:**:
+```mermaid
+flowchart LR
+subgraph "READ: When Cached Results"
+  n[node] -->|2. requests cache| r[Redis]
+  r[Redis] -->|3. results present in cache| n
+  n -->|4. Respond to client| u[User]
+  u-->|1. Get-Request|n
+end
+```
+```mermaid
+flowchart LR
+subgraph "READ: When Un-Cached Results"
+  n1 -->|2. requests\n cache| r1[Redis]  
+  r1[Redis] -->|3. results not\n present in cache| n1
+  n1 -->|4. requests\n DB| p1[(MongoDB)]
+  p1 -->|5. responds| n1
+  n1 -->|6. update\n cache| r1
+  u1-->|1. Get-Request| n1[node]
+  r1 -->|7. caching\n response| n1
+  n1 -->|8. respond\n to User| u1[User]
+end
+```
+#### **Write-request flow:**:
+```mermaid
+flowchart LR
+subgraph "WRITE: When Cached Results"  
+  n1 -->|4. fill or \n delete Cache| r1[Redis]
+  n1 -->|2. updates\n DB| p1[(MongoDB)]
+  p1 -->|3. DB update\n response| n1
+  r1 -->|5. caching\n response| n1
+  u1-->|1. Update\n or Delete\n request| n1[node]
+  n1 -->|6. respond\n to User| u1[User]
+end
+```

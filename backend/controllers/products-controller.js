@@ -96,7 +96,7 @@ const updateProduct = async (req, res, next) => {
       );
     }
 
-    productToUpdate.quantity = number;
+    productToUpdate.quantity = possibleUpdatedQuantity;
 
     await productToUpdate.save();
 
@@ -107,8 +107,10 @@ const updateProduct = async (req, res, next) => {
     };
 
     // Cache Invalid: So need to update entry for productId related entry.
-    await redisDeleteKey(getRedisKey(REDIS_QUERY_TYPE.GET_PRODUCT, req));
+    await redisSave(getRedisKey(REDIS_QUERY_TYPE.GET_PRODUCT, req), responseObject);
+
     // Cache Invalid: So need to update entry for all Products as well.
+    // We dont have that data yet, but on next getProducts request, it will get populated.
     await redisDeleteKey(getRedisKey(REDIS_QUERY_TYPE.GET_PRODUCTS, req));
 
     return res.status(200).send(responseObject);

@@ -1,11 +1,24 @@
-## Placement Cell (Coding Ninjas API Assignment):
+# Products API (Coding Ninjas API Assignment):
+
+Coding Ninjas Backend assignemnt, of Products related eCommerce api. Uses Node (Express), MongoDB and Redis.
+
+Features:
+- Use of middlewares (for validation of request fields, and caching).
+- Write-through caching using Redis.
+- CRUD for products with REST-APIs (see API description below).
+
+Backend hosted at: https://products-api-ux8g.onrender.com/
+### **Code Walkthrough:** 
+
+[![Code Walkthrough](https://img.youtube.com/vi/CN4HpTUrV2E/maxresdefault.jpg)](https://youtu.be/CN4HpTUrV2E)
+
 
 ------------------------------------------------------------------------------------------
-
-#### Create Product
-
+## APIs
+### Create Product
+<p>
 <details>
- <summary><code>POST</code> <code><b>/products/create</b></code> <code>Creates a product with `name` and `quantity`.</code></summary>
+ <summary><code>POST</code> <code><b>/products/create</b></code> <i>Creates a product with `name` and `quantity`.</i></summary>
 
 ##### Body Parameters
 
@@ -21,13 +34,12 @@
 > ```
 
 </details>
+</p></br>
 
-------------------------------------------------------------------------------------------
-
-#### Get product(s)
-
+### Get product(s)
+<p>
 <details>
- <summary><code>GET</code> <code><b>/{:productId}</b></code> <code>Get a product by id.</code></summary>
+ <summary><code>GET</code> <code><b>/{:productId}</b></code> <i>Get a product by id.</i></summary>
 
 ##### Path Parameters: /products/:productId
 
@@ -44,7 +56,7 @@
 </details>
 
 <details>
- <summary><code>GET</code> <code><b>/products/</b></code> <code>Gets all products</code></summary>
+ <summary><code>GET</code> <code><b>/products/</b></code> <i>Gets all products</i></summary>
 
 ##### Example cURL
 
@@ -53,21 +65,19 @@
 > ```
 
 </details>
+</p></br>
 
-------------------------------------------------------------------------------------------
+### Updates quantity of existing product
 
-
-#### Updates quantity of existing product
-
-<details>
-  <summary><code>PATCH</code> <code><b>products/{productId}/update_quantity?number={number}</b></code> <code>Updates quantity of product with productId.</code></summary>
+<p><details>
+  <summary><code>PATCH</code> <code><b>products/{productId}/update_quantity?number={number}</b></code> <i>Updates quantity of product with productId. Final quantity only allowed in [0,10,000]</i></summary>
 
 ##### Path Params
 
 > | name              |  type     | data type      | description                         |
 > |-------------------|-----------|----------------|-------------------------------------|
 > | `productId` |  required | MongoDB.OjecttId   | MongoDB unique Id of product        |
-> | `number` |  required | number   | Number to add or substract to updated quantity, which should be in range [0,10_000].        |
+> | `number` |  required | number   | Number to add or substract to updated quantity. In range [-10_000,10_000].        |
 
 ##### Example URL
 
@@ -75,13 +85,11 @@
 >  http://localhost:8001/products/640e382a014d5341380a599a/update_quantity?number=20
 > ```
 
-</details>
+</details></p></br>
 
-------------------------------------------------------------------------------------------
+### Deleting existing product by ID:
 
-#### Deleting existing product by ID:
-
-<details>
+<p><details>
   <summary><code>DELETE</code> <code><b>/products/:productId</b></code> <code>Deletes a specific product by ID</code></summary>
 
 ##### Path Parameters: /products/:productId
@@ -96,7 +104,7 @@
 >  http://localhost:8001/products/640e382a014d5341380a599a
 > ```
 
-</details>
+</details></p></br>
 
 ------------------------------------------------------------------------------------------
 
@@ -137,4 +145,36 @@ subgraph "WRITE: When Cached Results"
   u1-->|1. Update\n or Delete\n request| n1[node]
   n1 -->|6. respond\n to User| u1[User]
 end
+```
+---
+
+## Folder structure:
+
+```
+.
+├── README.md
+└── backend
+    ├── config
+    │   ├── dev.js (secret dev keys)
+    │   ├── keys.js (depending upon envt, populates keys)
+    │   └── prod.js (getting prod keys from process.env)
+    ├── controllers
+    │   └── products-controller.js (product controller)
+    ├── index.js (start point of code)
+    ├── middlewares (reusable and extensible middlewares)
+    │   ├── useCacheIfStored.js (customisable HOC, as per KEYs)
+    │   └── validationFactory.js (customisable HOC, as per Joi Schema)
+    ├── models
+    │   ├── product.js (mongoose schema)
+    │   └── validationSchemas.js (collection of Joi schemas).
+    ├── package-lock.json
+    ├── package.json
+    ├── redis
+    │   ├── redis.js (promisified wrappers on redis client).
+    │   └── redisHelper.js (getting keys, and list of keys in app).
+    ├── routes
+    │   └── product-routes.js (product related routes of app).
+    └── utils
+        ├── DTO.js (Data transformation object from MongoDB to API).
+        └── ErrorObject.js (Customisable error thrown usually by async code).
 ```

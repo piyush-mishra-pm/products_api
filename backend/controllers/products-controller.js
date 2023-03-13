@@ -1,7 +1,7 @@
 const ErrorObject = require('../utils/ErrorObject');
 const Product = require('../models/product');
 const {mongoDBToApiDTO} = require('../utils/DTO');
-const {redisSave, redisDeleteKey, redisGet} = require('../redis/redis');
+const {redisSave, redisDeleteKey} = require('../redis/redis');
 const {getRedisKey, REDIS_QUERY_TYPE} = require('../redis/redisHelper');
 const {MAX_PRODUCT_QUANTITY} = require('../models/validationSchemas');
 
